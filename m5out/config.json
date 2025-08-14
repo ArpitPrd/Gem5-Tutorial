@@ -661,7 +661,7 @@
                                 "name": "workload",
                                 "path": "board.processor.cores.core.workload",
                                 "cmd": [
-                                    "hello-world"
+                                    "mm"
                                 ],
                                 "cwd": "/home/arpit/Desktop/iitd/sem_7/COL718/projects/Gem5-Tutorial",
                                 "drivers": [],
@@ -670,7 +670,7 @@
                                 "errout": "cerr",
                                 "euid": 100,
                                 "eventq_index": 0,
-                                "executable": "hello-world",
+                                "executable": "mm",
                                 "gid": 100,
                                 "input": "cin",
                                 "kvmInSE": false,

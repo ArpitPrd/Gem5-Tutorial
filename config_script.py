@@ -221,6 +221,6 @@ run_simulation(
     "1GiB",
     "NoCache",
     "600MHz",
-    "hello-world",
+    "mm",
     "SE"
 )

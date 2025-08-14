@@ -78,6 +78,8 @@ gcc hello.c -o hello.1 -static -static-libgcc
 - gem5 script: gem5 is like a wrapper to python binary but with the fact that it aids to gem5 specific tasks
 - \n starts new line for points in commenting eg currently supprot \n 1. etc..
 - __main__ not supported in gem5 binary file
+- Doxygen @ingroups is the technique for docs   
+- -Wreturn-local-addr: you created something new in a function but after being destroyed pointer is a zombie
 
 ## Process Adopted by gem5 to run simulations
 
@@ -182,6 +184,7 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 
 - (For bonus you need a cross compiler)
 - read about stats from here: https://www.gem5.org/documentation/learning_gem5/part1/gem5_stats/
+- run over two types of CPUs in-order and out-of-order
 
 ## Did not understand but can be useful
 
