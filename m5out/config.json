@@ -177,7 +177,7 @@
             "name": "clk_domain",
             "path": "board.clk_domain",
             "clock": [
-                333
+                1667
             ],
             "domain_id": -1,
             "eventq_index": 0,
@@ -661,7 +661,7 @@
                                 "name": "workload",
                                 "path": "board.processor.cores.core.workload",
                                 "cmd": [
-                                    "./hello-world"
+                                    "hello-world"
                                 ],
                                 "cwd": "/home/arpit/Desktop/iitd/sem_7/COL718/projects/Gem5-Tutorial",
                                 "drivers": [],
@@ -670,7 +670,7 @@
                                 "errout": "cerr",
                                 "euid": 100,
                                 "eventq_index": 0,
-                                "executable": "./hello-world",
+                                "executable": "hello-world",
                                 "gid": 100,
                                 "input": "cin",
                                 "kvmInSE": false,

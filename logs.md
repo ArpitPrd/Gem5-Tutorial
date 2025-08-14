@@ -31,3 +31,16 @@
         - frequency plots
         - plan1: keep performance vs frequency plot and change the (CPU, Memory) pair to notice chnages
         - plan2: perf vs CPU Model at fixed (frequency, Mem Arch), different CPU
+
+## Day 3
+
+- Need to work on the following today:
+    - correct the matrix multiplication code
+    - how to change CPU Model 
+    - how to change CPU Frequency
+    - how to change mem configs
+
+    - work on the code for plotting various graphs
+
+- completed some refractoring of config script code
+- have to find all the type of memory and their respective processor required to run

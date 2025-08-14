@@ -73,6 +73,11 @@ gcc hello.c -o hello.1 -static -static-libgcc
 - git remote set-url <file> you can change the url where this project needs to be pushed
 - events can schedule other events
 - 1ps per tick = 10^12 ticks per sec
+- the binary produced is wrt ISA
+- inline can be used to suggest the compiler to replace a funciton call by the code itself when loops etc.. are not present (ref: https://www.geeksforgeeks.org/cpp/inline-functions-cpp/)
+- gem5 script: gem5 is like a wrapper to python binary but with the fact that it aids to gem5 specific tasks
+- \n starts new line for points in commenting eg currently supprot \n 1. etc..
+- __main__ not supported in gem5 binary file
 
 ## Process Adopted by gem5 to run simulations
 
@@ -142,11 +147,11 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
     - Power
     - Mips
 
-- Valid CPU Types:
+- Valid CPU Types: (https://www.gem5.org/documentation/general_docs/cpu_models/SimpleCPU#timingsimplecpu)
     (can use while using se.py)
-    - AtomicSimpleCPU
-    - O3CPU
-    - TimingSimpleCPu
+    - AtomicSimpleCPU (uses atomic memory access (?))
+    - O3CPU (uses pipielining)
+    - TimingSimpleCPu (uses timing memory access (?))
     - KvmCPU
     - MinorCPU
 
@@ -166,3 +171,23 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 - BinaryResource to be used
 - processor to be mentioned at length: processor = SimpleProcessor(cpu_type=CPUTypes.ATOMIC, num_cores=1, isa=ISA.X86)
 - OS and kernel (ig) are chosen by default
+
+## To Submit (Check before submission)
+
+- Report:
+    - Performance Variation (Grpahs + Table)
+
+- mm.c
+- Config Script file
+
+- (For bonus you need a cross compiler)
+- read about stats from here: https://www.gem5.org/documentation/learning_gem5/part1/gem5_stats/
+
+## Did not understand but can be useful
+
+- Trace: play-back that plays elastic probe atteached to o3 cpus
+
+## Working on Matrix Multiplication
+
+- can use this simple compilte method: https://vaibhaw-vipul.medium.com/matrix-multiplication-optimizing-the-code-from-6-hours-to-1-sec-70889d33dcfa
+- use the method in comp arch book
