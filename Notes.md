@@ -80,6 +80,15 @@ gcc hello.c -o hello.1 -static -static-libgcc
 - __main__ not supported in gem5 binary file
 - Doxygen @ingroups is the technique for docs   
 - -Wreturn-local-addr: you created something new in a function but after being destroyed pointer is a zombie
+- cannot multiple subprocesses in the same python code
+- trailing \ in bash script
+- separate out steps
+- newly created files do not have execute permission, give .sh file the required permission by (chmod +x <\file name>)
+- f.readlines() consumes the entire file and deletes the content of that file
+- every time we re-run with gem5 binary it empties the stats.txt
+- reading stats.txt in a code that was already written cannot be done, because sim doesnt end until the python process completes (not flushed yet)
+- stop running a .sh file by ctrl + z
+- O3 in gem5 is in context to out of order
 
 ## Process Adopted by gem5 to run simulations
 
@@ -159,6 +168,8 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 
 All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 
+- have a lot of ruby cache hierarchys not the normal ones
+
 
 ## Performance Metrics that may be used
 
@@ -186,6 +197,22 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 - read about stats from here: https://www.gem5.org/documentation/learning_gem5/part1/gem5_stats/
 - run over two types of CPUs in-order and out-of-order
 
+- time for compilation (N=100): 2min 17sec
+- time for out of order (N=2): 0.001335
+- time for in order (N=2, 2GiB, 600MHz): 0.000476
+- time for in order (N=2, 4GiB, 600MHz): 0.000476
+- time for in order (N=2, 2GiB, 1200MHz): 0.000238
+- host_intr_rate (in order, N=2)= 564745
+- host_intr_rate (ooo, N=2)= 84657
+
+- for reporting things chatgpt suggests a pretty good technique, it says why not once saved use the m5out inside the config script to make use of storing the important results to csv
+- chatgpt has given a script and I shall be using that script
+- mention the paper from which matrix multiplication has been derived
+- we do not load the entire OS
+- write how we compiled the code as gcc -O3 mm.c -o mm for aggressive compilation
+- we removed every sort or print statements, to ensure this
+- we are dropping ATOMIC for result compute and it is of no use becuase it is not timing accurate
+
 ## Did not understand but can be useful
 
 - Trace: play-back that plays elastic probe atteached to o3 cpus
@@ -194,3 +221,12 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 
 - can use this simple compilte method: https://vaibhaw-vipul.medium.com/matrix-multiplication-optimizing-the-code-from-6-hours-to-1-sec-70889d33dcfa
 - use the method in comp arch book
+
+## My code structure
+
+- my goal is to generate the csv file that contains a sweep of CPUs, Freqs, Mems
+- for that you need the stat file for each of them 
+- for stat file you to run the configs 
+- steps:
+    - ./multiple_sims.sh
+    - python3 utils.py

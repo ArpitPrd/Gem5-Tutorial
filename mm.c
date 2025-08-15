@@ -1,123 +1,45 @@
-#include <x86intrin.h>
-#include <stdio.h>
-
-#define UNROLL (4)
-#define BLOCKSIZE 32
-#define N 2
-
-// void do_block (int n, int si, int sj, int sk, double *A, double *B, double *C) {
-//     for ( int i = si; i < si+BLOCKSIZE; i+=UNROLL*4 ) {
-//         for ( int j = sj; j < sj+BLOCKSIZE; j++ ) {
-//             /*using 4 bytes for double storage*/
-//             __m256d c[4];
-//             for ( int x = 0; x < UNROLL; x++ ){
-//                 /*accessing the in the linear array*/
-//                 c[x] = _mm256_load_pd(C+i+x*4+j*n);
-//             }
-//             for( int k = sk; k < sk+BLOCKSIZE; k++ ) {
-//                 /*accessing b in the linear array*/
-//                 __m256d b = _mm256_broadcast_sd(B+k+j*n);
-//                 for (int x = 0; x < UNROLL; x++){
-//                     /* performing matrix multiplication */
-//                     c[x] = _mm256_add_pd(c[x], /* c[x]+=A[i][k]*b */_mm256_mul_pd(_mm256_load_pd(A+n*k+x*4+i), b));
-//                 }
-//             }
-
-//             for ( int x = 0; x < UNROLL; x++ ){
-//                 _mm256_store_pd(C+i+x*4+j*n, c[x]);
-//             }
-//         }
-//     }
-// }
-
-// void dgemm (int n, double* A, double* B, double* C) {
-//     for ( int sj = 0; sj < n; sj += BLOCKSIZE )
-//         for ( int si = 0; si < n; si += BLOCKSIZE )
-//             for ( int sk = 0; sk < n; sk += BLOCKSIZE )
-//                 do_block(n, si, sj, sk, A, B, C);
-// }
-
-// void mat_mul_full(double* A, double* B, double* C) {
-//     for ( int sj = 0; sj < N; sj += BLOCKSIZE )
-//         for ( int si = 0; si < N; si += BLOCKSIZE )
-//             for ( int sk = 0; sk < N; sk += BLOCKSIZE )
-//                 for ( int i = si; i < si+BLOCKSIZE; i+=UNROLL*4 ) {
-//                     for ( int j = sj; j < sj+BLOCKSIZE; j++ ) {
-//                         /*using 4 bytes for double storage*/
-//                         __m256d c[4];
-//                         for ( int x = 0; x < UNROLL; x++ ){
-//                             /*accessing the in the linear array*/
-//                             c[x] = _mm256_load_pd(C+i+x*4+j*N);
-//                         }
-//                         for( int k = sk; k < sk+BLOCKSIZE; k++ ) {
-//                             /*accessing b in the linear array*/
-//                             __m256d b = _mm256_broadcast_sd(B+k+j*N);
-//                             for (int x = 0; x < UNROLL; x++){
-//                                 /* performing matrix multiplication */
-//                                 c[x] = _mm256_add_pd(c[x], /* c[x]+=A[i][k]*b */_mm256_mul_pd(_mm256_load_pd(A+N*k+x*4+i), b));
-//                             }
-//                         }
-
-//                         for ( int x = 0; x < UNROLL; x++ ){
-//                             _mm256_store_pd(C+i+x*4+j*N, c[x]);
-//                         }
-//                     }
-//                 }
-// }
-
-double get_el(double *mat, int i, int j) {
-    return *(mat + i*(N-1) + j);
-}
-
-double *point_to_el(double *A, int i, int j) {
-    return A + i *(N-1) + j;
-}
-
+#define N 100
 /**
- * @brief transpose in place
+ * @brief multiplies in the block
  */
-void transpose(double * A) {
-    double At[N][N];
-    for (int i=0; i<N; i++) {
-        for (int j=0; j<N; j++) {
-            double tmpij = get_el(A, i, j);
-            double tmpji = get_el(A, j, i);
-            *(point_to_el(A, i, j)) = tmpji;
-            *(point_to_el(A, j, i)) = tmpij;
-        }
-    }
-}
-
-void mat_mul_no_cache(int n, double *A, double *B, double *C) {
-    transpose(B);
-
-    for (int i=0; i<n; i++) {
-        for (int j=0; j<n; j++) {
-            for (int k=0; k<n; k++) {
-                *(C+i*(n-1)+j) = get_el(A, i, k) * get_el(B, j, k);
+void multiply_block(int n, double *A, double *B, double *C, int block_size, int i, int j, int k) {
+    for (int ii = i; ii < i + block_size && ii < n; ii++) {
+        for (int jj = j; jj < j + block_size && jj < n; jj++) {
+            for (int kk = k; kk < k + block_size && kk < n; kk++) {
+                C[ii * n + jj] += A[ii * n + kk] * B[kk * n + jj];
             }
         }
     }
 }
 
-void print(int n, double *A) {
-    for (int i=0; i <n; i++) {
-        for (int j=0; j<n; j++) {
-            printf("%f ", get_el(A, i, j));
+/**
+ * @brief for initializing a matrix
+ */
+void initialize_matrix_to_zero(double* C, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i * n + j] = 0.0;
         }
-        printf("\n");
+    }
+}
+
+/**
+ * @brief multiplies across the matrices
+ */
+void mat_mul_blocked(int n, double *A, double *B, double *C, int block_size) {
+    
+    initialize_matrix_to_zero(C, n);
+    
+    for (int i = 0; i < n; i += block_size) {
+        for (int j = 0; j < n; j += block_size) {
+            for (int k = 0; k < n; k += block_size) {
+                multiply_block(n, A, B, C, block_size, i, j, k);
+            }
+        }
     }
 }
 
 int main() {
-    double A[N][N]={{2., 2.}, {2., 2.}}, B[N][N]={{2., 2.}, {2., 2.}}, C[N][N]={{2., 2.}, {2., 2.}};
-    printf("performing matrix multiplication\n");
-    
-    mat_mul_no_cache(N, (double *)A, (double *)B, (double *)C);
-    printf("A=\n");
-    print(N, (double *)A);
-    printf("B=\n");
-    print(N, (double *)B);
-    printf("C=\n");
-    print(N, (double *)C);
+    double A[N][N], B[N][N], C[N][N];    
+    mat_mul_blocked(N, (double *)A, (double *)B, (double *)C, 8);
 }
