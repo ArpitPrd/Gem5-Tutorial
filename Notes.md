@@ -89,6 +89,8 @@ gcc hello.c -o hello.1 -static -static-libgcc
 - reading stats.txt in a code that was already written cannot be done, because sim doesnt end until the python process completes (not flushed yet)
 - stop running a .sh file by ctrl + z
 - O3 in gem5 is in context to out of order
+- good practice to check what we have implemented is correct or not through config.ini
+- units of lat = ticks per count
 
 ## Process Adopted by gem5 to run simulations
 
@@ -132,6 +134,7 @@ gcc hello.c -o hello.1 -static -static-libgcc
 
 - Fixed the issue of not being able to run gem5 compiled version, becuase of using .out instead of .opt ;;
 - scons ran with all the cpu cores and without running in background (either one of them can be an issue)
+- Single channel, maybe all have the same variation?
 
 ## File Structure Layout
 
@@ -207,11 +210,12 @@ All gem5 BaseCPU’s take the naming format {ISA}{Type}CPU
 
 - for reporting things chatgpt suggests a pretty good technique, it says why not once saved use the m5out inside the config script to make use of storing the important results to csv
 - chatgpt has given a script and I shall be using that script
-- mention the paper from which matrix multiplication has been derived
+- mention the paper from which matrix multiplication has been derived https://www.akkadia.org/drepper/cpumemory.pdf
 - we do not load the entire OS
 - write how we compiled the code as gcc -O3 mm.c -o mm for aggressive compilation
 - we removed every sort or print statements, to ensure this
 - we are dropping ATOMIC for result compute and it is of no use becuase it is not timing accurate
+- have to look up some latency stuff
 
 ## Did not understand but can be useful
 

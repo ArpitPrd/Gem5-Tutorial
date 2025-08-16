@@ -44,3 +44,7 @@
 
 - completed some refractoring of config script code
 - have to find all the type of memory and their respective processor required to run
+
+## Day 4
+- Completed the report
+- start working on getting the latency and miss_rates and stuff

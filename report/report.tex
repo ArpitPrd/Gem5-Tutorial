@@ -9,6 +9,10 @@
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{xcolor}
 \usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\graphicspath{{../plots/}}
 
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\Z}{\mathbb{Z}}
@@ -57,7 +61,7 @@
 %                         Start here
 % --------------------------------------------------------------
  
-\title{Assignment 1}
+\title{Assignment 1: gem5 Tutorial}
 \author{Arpit Prasad\\ 
 COL718 - Architecture for High Performance Computers}
 
@@ -65,32 +69,140 @@ COL718 - Architecture for High Performance Computers}
 
 \section{Overview}
 
-In this assignment we perform analysis of different variants of computer hardware benchmarking on the matrix multiplication algorithm
-
-\section{Code for MM}
-\noindent For this assignment we assume the following code for MM. The fundamental principle for the given code is:
+In this assignment we perform sweep analysis of systems by varying the type of CPU, CPU frequency and Memory Configuration. For this assignment we have used the 
+following type for each of the mentioned variables:
 \begin{enumerate}
-    \item \textbf{Pattern of Memory Storage}: Main Memory stores information linearly however when we access (i, j) we might encounter misses due to two calls of (i, j) being in completly different blocks
+    \item CPU Types:
+    \begin{enumerate}
+        \item TIMING: In Order Execution
+        \item O3: Out of Order Exection
+    \end{enumerate}
+    \item CPU Frequency: A sweep from 0.6GHz to 3.3GHz in steps of 0.2GHz
+    \item Memory Configuations:
+    \begin{enumerate}
+        \item Single Channel DDR3 1600MHz
+        \item Single Channel DDR4 2400MHz
+        \item High Bandwidth Memory 
+    \end{enumerate}
 \end{enumerate}
 
-\noindent\textbf{Code for Matrix Multiplication}
-\lstinputlisting[language=C]{../mm.c}
+Following are the plots and variation of performances obtained in the sweep.
+
+\section{Matrix Multiplication}
+
+Reference for matrix Multiplication was taken from the following https://www.akkadia.org/drepper/cpumemory.pdf
+
+Here we perform block wise multiplication. This allows an entire block to be loaded onto the cache at once, and hence lesser miss rate.
+
+The binary produced from this code was done with following command
+
+\begin{lstlisting}[language=sh, frame=single, numbers=left, caption={Shell Script used to obtain binary}]
+    g++ -O3 mm.c -o mm
+\end{lstlisting}
+
+for agressive optimisations.
+
+The size of the matrices was assumed to be 100x100
+
+
 
 \section{Performance Metrics}
 \noindent The following is the overview of the performance metrics that are used to analyse the performance of a code with respect to a Model
+
+Note, the performance metrics are evaluated on SE mode (System Exection Mode)
 \begin{enumerate}
-    \item Raw speed of the processor
-    \item Latency 
-    \item Period
+    \item IPC: Instructions Per Cycle, indicating the throughput of the system
+    \item Simulation Seconds: Amount of time in seconds to simulate a binary on the simulated device
+    
 \end{enumerate}
 
-\section{Performance vs CPU Models}
+\section{Plots}
 
-\noindent Here we vary the CPU Models and check performance in the metrics specified above
+\subsection{IPC vs Frequency}
+First we keep Memory Configuation fixed and vary CPU Types and then CPU Type fixed and vary Memory Configuation
+\subsubsection{CPU Variation}
+From Fig. 1 the IPC remains nearly constant for both the types of CPU. This is because
+IPC is the measure of instructions per cycle. Therefore, as frequency increases
+the number of instruction per second increases and and the same time number of cycles per
+second. Therefore their division remains constant.
 
- 
+\noindent We can also see O3 being out of order has higher IPC than TIMING which has in order exection
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{ipc_vs_feq_line.png}
+    \caption{Variation of IPC when changing the frequency of the chipset, given a particular Memory Configuation}
+\end{figure}
+
+\subsubsection{Memory Configuation Variation}
+
+From Fig. 2 we again notice the value of IPC almost remains constant. (Note the scale of the graph makes it appear visually to vary highly.)
+Similar arguments as mentioned above apply here. HBM should technically be 
+faster than DDR3, however this cannot be reflected from the IPC vs Frequency graph due to 
+seconds cancelling on the division of Instructions/sec and Cycles/sec
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{ipc_vs_freq_mem.png}
+    \caption{Variation of IPC when changing frequency of the chipset, given a pparticular CPU Type}
+\end{figure}
+
+\subsection{Simulation Seconds vs Frequency}
+Again, we follow the same pattern, i.e., first we keep Memory Configuation fixed and 
+vary CPU Types and then CPU Type fixed and vary Memory Configuation.
+
+\subsubsection{CPU Variation}
+From Fig. 3, the variation we observe a downward trend in the graph. Since as the frequency increases the 
+amount of time taken for simulation decreases, since the number of instructions exected per second increases
+
+Again CPU Type O3 has smaller simulation time for a given frequency since it operates
+on out of order execution. Whereas, TIMING operates in order execution
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{sims_vs_freq.png}
+    \caption{Simulation Seconds vs Frequency, given a Memory Configuation}
+\end{figure}
+
+
+\subsubsection{Memory Configuration Variation}
+
+From Fig. 4 we again observe a downward sloping curve. However, here we observe
+the exact similar values of the different types of memory configurations. For different types of memory units we obsever similar values of simulation times given a frequency because as sweep through the frequency, either the max frequency of transfer of data from memory unit limits the cpu frequency when it is greater than memory's frequency or vice versa. Therfore at frequency lower than memory frequency, data transfers occur at cpu frequency. At higher cpu frequency, the data transfer is limited by the max frequency of memory
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{sims_vs_freq_mem.png}
+    \caption{Simulation Seconds vs Frequency, given a CPU Type}
+\end{figure}
+
+\subsection{Latency}
+
+We consider the average read and write Latencies of the systems, using a memory of Single Channel DDR3
+\begin{table}[h]
+    \centering
+    \caption{Variation of Latencies with CPU Types}
+    \resizebox{1.1\linewidth}{!}{
+    \begin{tabular}{|c|c|c|c|c|} % l: left, r: right, r: right alignment for the three columns
+        \hline
+        CPU Type & Order of Exection & Frequency & Read Latency (ticks / count) & Write Latency (ticks / count) \\
+        \hline
+        O3 & Out of Order & 600MHz & 27663.28 & 1020144433.51 \\
+        
+        TIMING & In Order & 600MHz & 29226.18 & 2080891024.17 \\
+        \hline
+        O3 & Out of Order & 800MHz & 28242.87 & 741798455.68 \\
+        
+        TIMING & In Order & 800MHz & 28712.47 & 1489806432.79 \\
+        \hline
+    \end{tabular}    }
+\end{table}
+
+From Table 1, clearly both the read and the write latencies are better for O3, which is executes instructions out of order.
+
+Latencies do not show variation with increase in frequency since they are measured in ticks per count. As frequency increases the number of ticks per second and count per second both increase and hence their division remains nearly constant.
+
 % --------------------------------------------------------------
 %     You don't have to mess with anything below this line.
 % --------------------------------------------------------------
- 
+
 \end{document}
